@@ -4,17 +4,16 @@
 Permite a criação de famílias de objetos relacionados ou dependentes sem especificar suas classes concretas.
 
 ## Também conhecido como
-Kit de fábrica
-Fábrica de fábricas
+- Kit
+- Fábrica de fábricas
 
 ## Motivação
 O código a seguir representa um problema clássico de alto acoplamento e dificuldade de manutenção. 
 
 @import "devicesExample/badCode/src/service/DeviceFactory.ts"
 
-
 O uso de estruturas como if ou switch para determinar o tipo de dispositivo e suas variantes gera as seguintes limitações:
-1. **Complexidade do Cliente**: A lógica para determinar o tipo de dispositivo está embutida na classe DeviceFactory, tornando-a mais difícil de manter e testar.
+1. **Complexidade do Cliente**: A lógica para determinar o dispositivo e seu tipo estão embutidas na classe DeviceFactory, tornando-a mais difícil de manter a longo prazo e testar.
 2. **Dificuldade para Adicionar Novos Produtos**: Sempre que um novo tipo de dispositivo (ou variante) é introduzido, é necessário modificar o método createDevice, violando o princípio aberto/fechado (Open/Closed Principle).
 
    
@@ -89,69 +88,67 @@ Use o padrão Abstract Factory quando:
 
 ## Outro exemplo
 
-```mermaid
----
-title: Fábrica de Marcas
----
-classDiagram
-    class Actor
+```plantuml
 
-    class IDeviceFactory {
-        +createPhones()
-        +createWatch()
-    }
+title Fábrica de Marcas
 
-    class AndroidFactory {
-        +createPhones() AndroidPhone
-        +createWatch() AndroidWatch
-    }
+class Actor
 
-    class AppleFactory {
-        +createPhones() IPhone
-        +createWatch() IWatch
-    }
+interface IDeviceFactory {
+    +createPhones()
+    +createWatch()
+}
 
-    class Phone {
-        +getDetails() string
-    }
+class AndroidFactory {
+    +createPhones(): AndroidPhone
+    +createWatch(): AndroidWatch
+}
 
-    class Watch {
-        +getDetails() string
-    }
+class AppleFactory {
+    +createPhones(): IPhone
+    +createWatch(): IWatch
+}
 
-    class AndroidPhone {
-        +getDetails() string
-    }
+class Phone {
+    +getDetails(): string
+}
 
-    class IPhone {
-        +getDetails() string
-    }
+class Watch {
+    +getDetails(): string
+}
 
-    class AndroidWatch {
-        +getDetails() string
-    }
+class AndroidPhone {
+    +getDetails(): string
+}
 
-    class IWatch {
-        +getDetails() string
-    }
+class IPhone {
+    +getDetails(): string
+}
 
-    %% Relações
-    Actor --> IDeviceFactory
+class AndroidWatch {
+    +getDetails(): string
+}
 
-    IDeviceFactory <|-- AndroidFactory
-    IDeviceFactory <|-- AppleFactory
+class IWatch {
+    +getDetails(): string
+}
 
-    AndroidFactory --> AndroidPhone
-    AndroidFactory --> AndroidWatch
+Actor --> IDeviceFactory
 
-    AppleFactory --> IPhone
-    AppleFactory --> IWatch
+IDeviceFactory <|-- AndroidFactory
+IDeviceFactory <|-- AppleFactory
 
-    AndroidPhone --|> Phone
-    IPhone --|> Phone
+AndroidFactory --> AndroidPhone
+AndroidFactory --> AndroidWatch
 
-    AndroidWatch --|> Watch
-    IWatch --|> Watch
+AppleFactory --> IPhone
+AppleFactory --> IWatch
+
+AndroidPhone --|> Phone
+IPhone --|> Phone
+
+AndroidWatch --|> Watch
+IWatch --|> Watch
 ```
 
 ## Participantes
@@ -166,15 +163,15 @@ classDiagram
 
 ### Phone e Watch (Produtos Abstratos)
 - São classes ou interfaces que definem os tipos de produtos criados pelas fábricas.
-  - **Phone**: Interface base para os diferentes tipos de telefones.
-  - **Watch**: Interface base para os diferentes tipos de relógios.
+  - **IPhone**: Interface base para os diferentes tipos de telefones.
+  - **IWatch**: Interface base para os diferentes tipos de relógios.
 
 ### AndroidPhone, IPhone, AndroidWatch e IWatch (Produtos Concretos)
 - Implementam as interfaces ou classes abstratas definidas por `Phone` e `Watch`.
   - **AndroidPhone**: Implementação concreta do produto `Phone` para dispositivos Android.
-  - **IPhone**: Implementação concreta do produto `Phone` para dispositivos Apple.
+  - **ApplePhone**: Implementação concreta do produto `Phone` para dispositivos Apple.
   - **AndroidWatch**: Implementação concreta do produto `Watch` para dispositivos Android.
-  - **IWatch**: Implementação concreta do produto `Watch` para dispositivos Apple.
+  - **AppleWatch**: Implementação concreta do produto `Watch` para dispositivos Apple.
 
 
 ## Colaborações
@@ -191,8 +188,7 @@ O cliente utiliza a Fábrica Abstrata para criar os objetos, e as Fábricas Conc
 ### Benefícios
 
 1. **Consistência entre produtos**: Garante que os produtos criados por uma fábrica pertencem à mesma família e funcionam bem juntos.
-   - Exemplo: Um sistema gráfico com botões e barras de rolagem consistentes em estilo.
-
+    > Exemplo: Um sistema gráfico com botões e barras de rolagem consistentes em estilo.
 2. **Isolamento da implementação**: O cliente interage apenas com interfaces ou classes abstratas, deixando o código mais flexível e desacoplado.
 
 3. **Facilidade para introduzir novas famílias de produtos**: Adicionar uma nova família requer apenas criar uma nova Fábrica Concreta e seus produtos concretos.
@@ -210,133 +206,54 @@ O cliente utiliza a Fábrica Abstrata para criar os objetos, e as Fábricas Conc
 ## Implementação
 
 1. **Definir a Fábrica Abstrata**: Declare métodos para criar cada tipo de produto relacionado.
-   ```java
-   interface DeviceFactory {
-       Phone createPhone();
-       Watch createWatch();
-   }
-   ```
+
+@import "devicesExample/goodCode/src/services/contracts/IDeviceFactory.ts"
 
 2. **Implementar as Fábricas Concretas**: Implemente a interface da Fábrica Abstrata, criando objetos específicos de uma família.
-   ```java
-   class AndroidFactory implements DeviceFactory {
-       public Phone createPhone() {
-           return new AndroidPhone();
-       }
 
-       public Watch createWatch() {
-           return new AndroidWatch();
-       }
-   }
+@import "devicesExample/goodCode/src/services/factorys/AndroidFactory.ts"
 
-   class AppleFactory implements DeviceFactory {
-       public Phone createPhone() {
-           return new IPhone();
-       }
-
-       public Watch createWatch() {
-           return new IWatch();
-       }
-   }
-   ```
+@import "devicesExample/goodCode/src/services/factorys/AppleFactory.ts"
 
 3. **Definir os Produtos Abstratos**: Crie interfaces ou classes abstratas para os produtos.
-   ```java
-   interface Phone {
-       void getDetails();
-   }
 
-   interface Watch {
-       void getDetails();
-   }
-   ```
+@import "devicesExample/goodCode/src/core/contracts/IPhone.ts"
+
+@import "devicesExample/goodCode/src/core/contracts/IWatch.ts"
 
 4. **Implementar os Produtos Concretos**: Implemente os produtos abstratos.
-   ```java
-   class AndroidPhone implements Phone {
-       public void getDetails() {
-           System.out.println("Este é um telefone Android.");
-       }
-   }
 
-   class IPhone implements Phone {
-       public void getDetails() {
-           System.out.println("Este é um iPhone.");
-       }
-   }
-   ```
+@import "devicesExample/goodCode/src/core/models/android/AndroidPhone.ts"
+
+@import "devicesExample/goodCode/src/core/models/android/AndroidWatch.ts"
+
+@import "devicesExample/goodCode/src/core/models/ios/ApplePhone.ts"
+
+@import "devicesExample/goodCode/src/core/models/ios/AppleWatch.ts"
 
 5. **Usar o Padrão**: O cliente cria a fábrica concreta desejada e utiliza para criar os produtos.
-   ```java
-   public class Client {
-       public static void main(String[] args) {
-           DeviceFactory factory = new AndroidFactory();
-           Phone phone = factory.createPhone();
-           Watch watch = factory.createWatch();
 
-           phone.getDetails();
-           watch.getDetails();
-       }
-   }
-   ```
-
-## Exemplo Completo
-
-Imagine que você quer criar um sistema para produzir telefones e relógios de diferentes marcas:
-
-```java
-public interface DeviceFactory {
-    Phone createPhone();
-    Watch createWatch();
-}
-
-public class AndroidFactory implements DeviceFactory {
-    public Phone createPhone() {
-        return new AndroidPhone();
-    }
-
-    public Watch createWatch() {
-        return new AndroidWatch();
-    }
-}
-
-public class AppleFactory implements DeviceFactory {
-    public Phone createPhone() {
-        return new IPhone();
-    }
-
-    public Watch createWatch() {
-        return new IWatch();
-    }
-}
-
-public interface Phone {
-    void getDetails();
-}
-
-public class AndroidPhone implements Phone {
-    public void getDetails() {
-        System.out.println("Telefone Android criado.");
-    }
-}
-
-public class IPhone implements Phone {
-    public void getDetails() {
-        System.out.println("iPhone criado.");
-    }
-}
-```
+@import "devicesExample/goodCode/src/main.ts"
 
 ## Usos Conhecidos
 
-1. **Sistemas gráficos multiplataforma**: Criar interfaces adaptadas para diferentes sistemas operacionais.
-2. **Bibliotecas de persistência**: Fornecer implementações diferentes para diversos tipos de bancos de dados.
-3. **Frameworks de jogos**: Configurar texturas, sons e objetos específicos para cada plataforma.
+- O InterViews utiliza o padrão Abstract Factory para a geração de componentes de interface gráfica. Suas abstrações-chave são WidgetKit e DialogKit, que criam objetos específicos para interação, e LayoutKit, que compõe objetos de acordo com o layout desejado. O ET++ [WGM88] também emprega Abstract Factory para garantir portabilidade entre sistemas de janelas. Sua classe base WindowSystem define uma interface para criação de recursos gráficos, como janelas e fontes, enquanto subclasses concretas implementam essas operações para diferentes sistemas. Em tempo de execução, uma instância de WindowSystem é criada dinamicamente para fornecer os objetos apropriados.
 
+- O padrão Abstract Factory da Oracle gerencia o acesso a dados em aplicações J2EE, garantindo flexibilidade e portabilidade entre diferentes fontes de armazenamento. Suas abstrações-chave são DAOFactory e DataAccessObject. Diferentes fontes de dados são implementadas como subclasses de DAOFactory, permitindo que a aplicação selecione dinamicamente a implementação adequada, como OracleDAOFactory ou CloudscapeDAOFactory. O DataAccessObject abstrai o acesso ao banco de dados e delega operações a objetos específicos, como CustomerDAO e AccountDAO. Essa abordagem desacopla a camada de negócios da persistência, facilitando a migração entre bancos de dados e promovendo reutilização e manutenção eficiente.
+[Oracle: Padrões principais do J2EE - Objeto de acesso a dados](https://www.oracle.com/java/technologies/dataaccessobject.html)
+
+## Padrão relacionados
+**Factory Method**: O padrão AbstractFactory é implementado com frequência com o factory method
+
+**Prototype**: O padrão AbstractFactory também pode ser implementado utilizando prototype
+
+**Singleton**: Uma fábrica concreta é freqüentemente um singleton
 
 ## Conclusão
-
 O padrão **Abstract Factory** é uma solução poderosa para criar famílias de objetos relacionados, mantendo a consistência e a flexibilidade do código. Ele é ideal para sistemas que precisam suportar múltiplas variações de produtos, desde que a complexidade adicional seja gerenciável.
 
+## Referências
 
-
+- GAMMA, Erich et al. Padrões de projeto [recurso eletrônico]: soluções reutilizáveis de software orientado a objetos. Tradução de Luiz A. Meirelles Salgado. Porto Alegre: Bookman, 2007.
+- SHVETS, Alexander. Mergulho no agulho nos padrões de projeto. v.2021-1.16. 2021.
+- ORACLE. Data Access Object (DAO). Disponível em: https://www.oracle.com/java/technologies/dataaccessobject.html. Acesso em: 5 fev. 2025.
