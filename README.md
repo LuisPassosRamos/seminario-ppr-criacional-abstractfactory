@@ -8,6 +8,9 @@ Permite a criação de famílias de objetos relacionados ou dependentes sem espe
 - Fábrica de fábricas
 
 ## Motivação
+
+Pense em criar um sistema que precisa gerenciar diversas famílias de objetos relacionados, tais como componentes gráficos em diversas plataformas ou dispositivos de diversos fabricantes. Inicialmente, é possível criar objetos com estruturas condicionais, determinando qual tipo de produto deve ser instanciado. Contudo, à medida que o sistema se expande e novas categorias de produtos são incorporadas, essa estratégia se torna inflexível e difícil de manter. A solução encontrada pelo padrão Abstract Factory é proporcionar uma interface central para a criação de objetos relacionados, assegurando que cada agrupamento de produtos seja criado de forma consistente e desacoplado. Isso não só torna a manutenção do código mais simples, como também possibilita o crescimento do sistema sem alterar a lógica já estabelecida, favorecendo a flexibilidade e a organização.
+
 O código a seguir representa um problema clássico de alto acoplamento e dificuldade de manutenção. 
 
 @import "devicesExample/badCode/src/service/DeviceFactory.ts"
@@ -27,66 +30,7 @@ Use o padrão Abstract Factory quando:
 - Desejar garantir que objetos de uma mesma família sejam usados em conjunto.
 - Desejar fornecer uma biblioteca de classes de produtos sem alterar o código do cliente e sem expor suas interfaces e implementação.
 
-
-## Estrutura
-
-```plantuml
-
-    class WidgetFactory {
-        +CreateScrollBar()
-        +CreateWindow()
-    }
-    class MotifWidgetFactory extends WidgetFactory  {
-        +CreateScrollBar()
-        +CreateWindow()
-    }
-    class PMWidgetFactory  extends WidgetFactory{
-        +CreateScrollBar()
-        +CreateWindow()
-    }
-    class Client {
-        +operation()
-    }
-    class ScrollBar
-    class MotifScrollBar extends ScrollBar
-    class PMScrollBar extends ScrollBar
-    class Window
-    class MotifWindow extends Window
-    class PMWindow  extends Window
-
-    Client --> Window
-    Client --> ScrollBar
-    MotifWidgetFactory --> MotifScrollBar
-    MotifWidgetFactory --> MotifWindow
-    PMWidgetFactory --> PMScrollBar
-    PMWidgetFactory --> PMWindow
-```
-
-## Participantes
-
-### WidgetFactory (Fábrica Abstrata)
-- Define uma interface para criar famílias de objetos relacionados, como `CreateScrollBar()` e `CreateWindow()`.
-
-### MotifWidgetFactory e PMWidgetFactory (Fábricas Concretas)
-- Implementam a interface `WidgetFactory` para criar produtos específicos.
-  - **MotifWidgetFactory**: Cria instâncias de `MotifScrollBar` e `MotifWindow`.
-  - **PMWidgetFactory**: Cria instâncias de `PMScrollBar` e `PMWindow`.
-
-### ScrollBar e Window (Produtos Abstratos)
-- Representam interfaces ou classes abstratas para os tipos de produtos que serão criados.
-  - **ScrollBar**: Interface para barras de rolagem.
-  - **Window**: Interface para janelas.
-
-### MotifScrollBar, PMScrollBar, MotifWindow e PMWindow (Produtos Concretos)
-- Implementam os produtos abstratos definidos por `ScrollBar` e `Window`.
-  - **MotifScrollBar** e **PMScrollBar**: Implementações concretas do produto `ScrollBar`.
-  - **MotifWindow** e **PMWindow**: Implementações concretas do produto `Window`.
-
-### Client
-- Utiliza apenas as interfaces fornecidas por `WidgetFactory`, `ScrollBar` e `Window` para criar e usar os objetos. 
-
-
-## Outro exemplo
+## Exemplo Aplicado
 
 ```plantuml
 
@@ -95,13 +39,13 @@ title Fábrica de Marcas
 class Actor
 
 interface IDeviceFactory {
-    +createPhones()
-    +createWatch()
+    +createPhones(): IPhone
+    +createWatch(): IWatch
 }
 
 class AndroidFactory {
-    +createPhones(): AndroidPhone
-    +createWatch(): AndroidWatch
+    +createPhones(): IPhone
+    +createWatch(): IWatch
 }
 
 class AppleFactory {
@@ -109,11 +53,11 @@ class AppleFactory {
     +createWatch(): IWatch
 }
 
-class Phone {
+interface IPhone {
     +getDetails(): string
 }
 
-class Watch {
+interface IWatch {
     +getDetails(): string
 }
 
@@ -121,7 +65,7 @@ class AndroidPhone {
     +getDetails(): string
 }
 
-class IPhone {
+class ApplePhone {
     +getDetails(): string
 }
 
@@ -129,49 +73,54 @@ class AndroidWatch {
     +getDetails(): string
 }
 
-class IWatch {
+class AppleWatch {
     +getDetails(): string
 }
 
 Actor --> IDeviceFactory
 
-IDeviceFactory <|-- AndroidFactory
-IDeviceFactory <|-- AppleFactory
+IDeviceFactory --|> AndroidFactory
+IDeviceFactory --|> AppleFactory
 
-AndroidFactory --> AndroidPhone
-AndroidFactory --> AndroidWatch
+AndroidFactory --|> IWatch
+AppleFactory --|> IWatch
+AndroidFactory --|> IPhone
+AppleFactory --|> IPhone
 
-AppleFactory --> IPhone
-AppleFactory --> IWatch
+IWatch --> AppleWatch 
+IWatch --> AndroidWatch
 
-AndroidPhone --|> Phone
-IPhone --|> Phone
-
-AndroidWatch --|> Watch
-IWatch --|> Watch
+IPhone --> ApplePhone
+IPhone --> AndroidPhone
 ```
+.
+## Estrutura GOF
+![Image](https://github.com/user-attachments/assets/baa8c39d-3066-4327-8eeb-8deea6e96266)
 
 ## Participantes
 
-### IDeviceFactory (Fábrica Abstrata)
+### AbstractFactory (IDeviceFactory)
 - Define a interface para a criação de famílias de produtos relacionados, como `createPhones()` e `createWatch()`.
 
-### AndroidFactory e AppleFactory (Fábricas Concretas)
+### Concrete Factory (AndroidFactory, AppleFactory)
 - Implementam a interface `IDeviceFactory` para criar produtos específicos.
   - **AndroidFactory**: Cria instâncias de `AndroidPhone` e `AndroidWatch`.
-  - **AppleFactory**: Cria instâncias de `IPhone` e `IWatch`.
+  - **AppleFactory**: Cria instâncias de `ApplePhone ` e `AppleWatch`.
 
-### Phone e Watch (Produtos Abstratos)
-- São classes ou interfaces que definem os tipos de produtos criados pelas fábricas.
-  - **IPhone**: Interface base para os diferentes tipos de telefones.
-  - **IWatch**: Interface base para os diferentes tipos de relógios.
+### AbstractProduct (Phone e Watch)
+- São interfaces que definem as operações básicas dos produtos.
+  - **IPhone**: Método `getDetails()`:Retorna informações sobre o telefone.
+  - **IWatch**: Método `getDetails()`:Retorna informações sobre o relógio.
 
-### AndroidPhone, IPhone, AndroidWatch e IWatch (Produtos Concretos)
-- Implementam as interfaces ou classes abstratas definidas por `Phone` e `Watch`.
-  - **AndroidPhone**: Implementação concreta do produto `Phone` para dispositivos Android.
-  - **ApplePhone**: Implementação concreta do produto `Phone` para dispositivos Apple.
-  - **AndroidWatch**: Implementação concreta do produto `Watch` para dispositivos Android.
-  - **AppleWatch**: Implementação concreta do produto `Watch` para dispositivos Apple.
+### ConcreteProduct (AndroidPhone, ApplePhone, AndroidWatch e AppleWatch)
+- Implementam as interfaces `IPhone` e `IWatch`, representando produtos específicos.
+  - **AndroidPhone**: Implementação concreta do produto `IPhone` para dispositivos Android.
+  - **ApplePhone**: Implementação concreta do produto `IPhone` para dispositivos Apple.
+  - **AndroidWatch**: Implementação concreta do produto `IWatch` para dispositivos Android.
+  - **AppleWatch**: Implementação concreta do produto `IWatch` para dispositivos Apple.
+  
+### Client (Actor)
+- Usa somente interfaces declaradas pelas classes Abstract Factory.
 
 
 ## Colaborações
