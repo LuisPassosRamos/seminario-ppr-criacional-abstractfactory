@@ -198,6 +198,182 @@ O cliente utiliza a Fábrica Abstrata para criar os objetos, e as Fábricas Conc
 
 **Singleton**: Uma fábrica concreta é freqüentemente um singleton
 
+## Exemplos complementares
+
+### UML
+
+```plantuml
+
+interface DatabaseConnection {
+    + connect()
+}
+
+class MySQLConnection {
+    + connect()
+}
+class MongoDBConnection {
+    + connect()
+}
+
+DatabaseConnection <|-- MySQLConnection
+DatabaseConnection <|-- MongoDBConnection
+
+interface DataRepository {
+    + save(String data)
+    + find(int id)
+}
+
+class MySQLRepository {
+    + save(String data)
+    + find(int id)
+}
+class MongoDBRepository {
+    + save(String data)
+    + find(int id)
+}
+
+DataRepository <|-- MySQLRepository
+DataRepository <|-- MongoDBRepository
+
+interface DatabaseFactory {
+    + createConnection(): DatabaseConnection
+    + createRepository(): DataRepository
+}
+
+class MySQLFactory {
+    + createConnection()
+    + createRepository()
+}
+class MongoDBFactory {
+    + createConnection()
+    + createRepository()
+}
+
+DatabaseFactory <|-- MySQLFactory
+DatabaseFactory <|-- MongoDBFactory
+
+class Application {
+    - DatabaseConnection connection
+    - DataRepository repository
+    + Application(DatabaseFactory factory)
+    + run()
+}
+
+Application --> DatabaseFactory
+DatabaseFactory --> DatabaseConnection
+DatabaseFactory --> DataRepository
+
+```
+
+```java
+// Interface para a conexão com o banco de dados
+interface DatabaseConnection {
+    void connect();
+}
+
+// Implementações para diferentes bancos
+class MySQLConnection implements DatabaseConnection {
+    public void connect() {
+        System.out.println("Conectando ao MySQL...");
+    }
+}
+
+class MongoDBConnection implements DatabaseConnection {
+    public void connect() {
+        System.out.println("Conectando ao MongoDB...");
+    }
+}
+
+// Interface para operações de repositório (CRUD)
+interface DataRepository {
+    void save(String data);
+    String find(int id);
+}
+
+// Implementações concretas para cada banco de dados
+class MySQLRepository implements DataRepository {
+    public void save(String data) {
+        System.out.println("Salvando no MySQL: " + data);
+    }
+
+    public String find(int id) {
+        return "Dados do MySQL com ID " + id;
+    }
+}
+
+class MongoDBRepository implements DataRepository {
+    public void save(String data) {
+        System.out.println("Salvando no MongoDB: " + data);
+    }
+
+    public String find(int id) {
+        return "Dados do MongoDB com ID " + id;
+    }
+}
+
+// Abstract Factory para criar conexões e repositórios
+interface DatabaseFactory {
+    DatabaseConnection createConnection();
+    DataRepository createRepository();
+}
+
+// Implementações concretas da fábrica para MySQL
+class MySQLFactory implements DatabaseFactory {
+    public DatabaseConnection createConnection() {
+        return new MySQLConnection();
+    }
+
+    public DataRepository createRepository() {
+        return new MySQLRepository();
+    }
+}
+
+// Implementações concretas da fábrica para MongoDB
+class MongoDBFactory implements DatabaseFactory {
+    public DatabaseConnection createConnection() {
+        return new MongoDBConnection();
+    }
+
+    public DataRepository createRepository() {
+        return new MongoDBRepository();
+    }
+}
+
+// Aplicação que usa a fábrica abstrata
+class Application {
+    private DatabaseConnection connection;
+    private DataRepository repository;
+
+    public Application(DatabaseFactory factory) {
+        this.connection = factory.createConnection();
+        this.repository = factory.createRepository();
+    }
+
+    public void run() {
+        connection.connect();
+        repository.save("Dado de teste");
+        System.out.println(repository.find(1));
+    }
+}
+
+// Teste da implementação
+public class Main {
+    public static void main(String[] args) {
+        DatabaseFactory mysqlFactory = new MySQLFactory();
+        Application mysqlApp = new Application(mysqlFactory);
+        System.out.println("Sistema com MySQL:");
+        mysqlApp.run();
+
+        System.out.println("\n---------------------\n");
+
+        DatabaseFactory mongoFactory = new MongoDBFactory();
+        Application mongoApp = new Application(mongoFactory);
+        System.out.println("Sistema com MongoDB:");
+        mongoApp.run();
+    }
+}
+```
+
 ## Conclusão
 O padrão **Abstract Factory** é uma solução poderosa para criar famílias de objetos relacionados, mantendo a consistência e a flexibilidade do código. Ele é ideal para sistemas que precisam suportar múltiplas variações de produtos, desde que a complexidade adicional seja gerenciável.
 
