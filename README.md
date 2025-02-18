@@ -200,6 +200,10 @@ O cliente utiliza a Fábrica Abstrata para criar os objetos, e as Fábricas Conc
 
 ## Exemplos complementares
 
+### Motivação
+
+Este código e diagrama abordam o problema de como criar e integrar conjuntos de objetos relacionados, nesse caso, conexões e repositórios de dados, de forma que a aplicação possa trabalhar com diferentes bancos de dados (como MySQL e MongoDB) sem modificar sua lógica principal. Utilizando o padrão Abstract Factory, a aplicação delega a criação dos objetos a fábricas específicas, garantindo que os componentes (conexão e repositório) sejam compatíveis entre si e permitindo a troca do banco de dados de maneira transparente e desacoplada.
+
 ### UML
 
 ```plantuml
@@ -264,6 +268,17 @@ DatabaseFactory --> DatabaseConnection
 DatabaseFactory --> DataRepository
 
 ```
+### Participantes
+DatabaseConnection (Produto Abstrato): Define a interface para conexões com o banco de dados.
+MySQLConnection (Produto Concreto): Implementa a conexão específica para o MySQL.
+MongoDBConnection (Produto Concreto): Implementa a conexão específica para o MongoDB.
+DataRepository (Produto Abstrato): Define a interface para operações de armazenamento e recuperação de dados.
+MySQLRepository (Produto Concreto): Implementa as operações de repositório específicas para o MySQL.
+MongoDBRepository (Produto Concreto): Implementa as operações de repositório específicas para o MongoDB.
+DatabaseFactory (Fábrica Abstrata): Define a interface para criação de conexões e repositórios.
+MySQLFactory (Fábrica Concreta): Cria instâncias de **MySQLConnection** e **MySQLRepository**.
+MongoDBFactory (Fábrica Concreta): Cria instâncias de **MongoDBConnection** e **MongoDBRepository**.
+Application (Cliente): Utiliza uma **DatabaseFactory** para obter a conexão e o repositório apropriados, garantindo que a aplicação funcione de forma independente do banco de dados específico.
 
 ```java
 // Interface para a conexão com o banco de dados
