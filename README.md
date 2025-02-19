@@ -270,14 +270,23 @@ DatabaseFactory --> DataRepository
 ```
 ### Participantes
 DatabaseConnection (Produto Abstrato): Define a interface para conexões com o banco de dados.
+
 MySQLConnection (Produto Concreto): Implementa a conexão específica para o MySQL.
+
 MongoDBConnection (Produto Concreto): Implementa a conexão específica para o MongoDB.
+
 DataRepository (Produto Abstrato): Define a interface para operações de armazenamento e recuperação de dados.
+
 MySQLRepository (Produto Concreto): Implementa as operações de repositório específicas para o MySQL.
+
 MongoDBRepository (Produto Concreto): Implementa as operações de repositório específicas para o MongoDB.
+
 DatabaseFactory (Fábrica Abstrata): Define a interface para criação de conexões e repositórios.
+
 MySQLFactory (Fábrica Concreta): Cria instâncias de **MySQLConnection** e **MySQLRepository**.
+
 MongoDBFactory (Fábrica Concreta): Cria instâncias de **MongoDBConnection** e **MongoDBRepository**.
+
 Application (Cliente): Utiliza uma **DatabaseFactory** para obter a conexão e o repositório apropriados, garantindo que a aplicação funcione de forma independente do banco de dados específico.
 
 ```java
